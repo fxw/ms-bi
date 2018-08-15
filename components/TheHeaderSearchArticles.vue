@@ -8,7 +8,7 @@
     </button>
     <div class="inner-container" :class="{ 'results-visible': resultsVisible && searchQuery }">
       <div class="input-container" ref="inputContainer">
-        <input name="search" placeholder="Search products" ref="searchQuery" type="text" v-model="searchQuery"
+        <input name="search" placeholder="Search articles" ref="searchQuery" type="text" v-model="searchQuery"
           @keyup.prevent="debounceSearch($event)"
           @keydown.prevent.enter="enter"
           @keydown.prevent.down="down"
@@ -35,13 +35,18 @@
           <li ref="result" v-for="(article, index) in articles" :key="article.id" v-if="$route.params.article != article.slug">
             <nuxt-link :to="`/${article.slug}`" class="row" :class="{'active': selectedResult(index)}" @mouseover.native="current = index">
               <div class="col thumb">
-                <div class="lazy">
-                  <img v-lazy="`http://static.marineetstamp.com/images/EC/${article.slug}S.jpg`"/>
+                <div class="lazy" v-if="article._embedded['wp:featuredmedia']">
+                  <img v-lazy="article._embedded['wp:featuredmedia'][0].media_details.sizes.thumbnail.source_url">
                 </div>
+                <svg v-else fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M24 24H0V0h24v24z" fill="none"/>
+                  <path d="M21 3H3C2 3 1 4 1 5v14c0 1.1.9 2 2 2h18c1 0 2-1 2-2V5c0-1-1-2-2-2zM5 17l3.5-4.5 2.5 3.01L14.5 11l4.5 6H5z"/>
+                </svg>
               </div>
               <div class="col copy">
-               <div class="meta">
-                  <span v-html="(article.name)"></span>
+                <span class="title" v-html="article.title.rendered"></span>
+                <div class="meta">
+                  <span v-html="longTimestamp(article.date)"></span>&nbsp;–&nbsp;<span class="topic" v-for="topic in article._embedded['wp:term'][0]" :key="topic.id" v-html="topic.name" v-if="topic.slug !== 'featured'"></span>
                 </div>
               </div>
             </nuxt-link>
@@ -105,7 +110,7 @@ export default {
     search () {
       this.spinnerVisible = true
 
-      axios.get(`${this.$store.state.wordpressAPI}/wp/v2/products_used?search=${this.searchQuery}&_embed&per_page=8`)
+      axios.get(`${this.$store.state.wordpressAPI}/wp/v2/posts?search=${this.searchQuery}&_embed&per_page=8`)
         .then(response => {
           this.apiResponse = true
           this.spinnerVisible = false
