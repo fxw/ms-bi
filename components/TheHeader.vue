@@ -8,7 +8,7 @@
         <nuxt-link to="/" exact>Latest Articles</nuxt-link>
         <nuxt-link to="/topics">Topics</nuxt-link>
         <nuxt-link to="/authors">Authors</nuxt-link>
-        <nuxt-link to="/pages/sample-page">Sample Page</nuxt-link>
+        <nuxt-link to="/pages/about-me">Sample Page</nuxt-link>
       </nav>
       <TheHeaderSearch/>
     </div>
